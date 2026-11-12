@@ -1,0 +1,29 @@
+- name: Ensure data directory is owned by elasticsearch
+  file:
+    path: "{{ item }}"
+    owner: "{{ es_owner }}"
+    group: "{{ es_owner }}"
+    state: directory
+    recurse: yes
+  loop:
+    - "{{ es_home }}"
+    - "{{ es_data_dir }}"
+
+- name: Check Elasticsearch 
+  ansible.builtin.shell: pg -ef | grep '[e]lasticsearch' | grep -v grep
+  register: es_process_check
+  ignore_errors: true
+
+- name: Debug Elasticsearch result
+  debug:
+    msg:
+      - "stdout: {{ es_process_check.stdout }}"
+      - "rc (return code): {{ es_process_check.rc }}"
+      - "stderr: {{ es_process_check.stderr }}"
+
+- name: Run Elasticsearch on bootstrap node
+  command: "{{ es_home }}/bin/elasticsearch -d"
+  become: true
+  become_user: "{{ es_owner }}"
+  when:
+    - es_process_check.rc != 0

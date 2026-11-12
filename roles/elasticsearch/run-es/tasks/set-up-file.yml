@@ -1,0 +1,38 @@
+- name: Copy install file
+  ansible.builtin.copy:
+    src: elasticsearch-7.17.10-linux-x86_64.tar.gz
+    dest: "{{ es_path }}/elasticsearch-7.17.10-linux-x86_64.tar.gz"
+    mode: '0755'
+
+- name: Extract elasticsearch tarball
+  ansible.legacy.unarchive:
+    src: "{{ es_path }}/elasticsearch-7.17.10-linux-x86_64.tar.gz"
+    dest: "{{ es_path }}"
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+
+- name: Generate config file from template
+  ansible.builtin.template:
+    src: elasticsearch.yml.j2
+    dest: "{{ es_path }}/config/elasticsearch.yml"
+    owner: "{{ es_owner }}"
+    group: "{{ es_owner }}"
+    mode: '0755'
+
+- name: Generate config file from template
+  ansible.builtin.template:
+    src: jvm.options.j2
+    dest: "{{ es_path }}/config/jvm.options"
+    owner: "{{ es_owner }}"
+    group: "{{ es_owner }}"
+    mode: '0755'
+- name: Ensure data directory is owned by elasticsearch
+  file:
+    path: "{{ item }}"
+    owner: "{{ es_owner }}"
+    group: "{{ es_owner }}"
+    state: directory
+    recurse: yes
+  loop:
+    - "{{ es_home }}"
+    - "{{ es_data_dir }}"

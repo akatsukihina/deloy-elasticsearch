@@ -1,0 +1,95 @@
+- name: Set bootstrap node
+  set_fact:
+    es_bootstrap_host: "{{ ansible_play_hosts_all[0] }}"
+  run_once: true
+
+- name: Create CA certificate
+#  no_log: true
+  run_once: true
+  delegate_to: "{{ es_bootstrap_host }}"
+  ansible.builtin.expect:
+    command: "{{ es_home }}/bin/elasticsearch-certutil ca"
+    responses:
+      'Please enter the desired output file \[elastic-stack-ca.p12\]:': "{{ elasticsearch_stack_ca_file }}"
+      'Enter password for elastic-node-cert.p12': "{{ elastic_password }}"
+
+- name: Create node certificate
+#  no_log: true
+  run_once: true
+  delegate_to: "{{ es_bootstrap_host }}"
+  ansible.builtin.expect:
+    command: >
+      {{ es_home }}/bin/elasticsearch-certutil cert
+      --ca {{ elasticsearch_stack_ca_file }}
+    responses:
+      'Enter password for CA \(/u01/elasticsearch/config/elastic-node-cert.p12\)': "{{ elastic_password }}"
+      'Please enter the desired output file \[elastic-certificates.p12\]': "{{ elasticsearch_cert_file }}"
+      'Enter password for elastic-certificates.p12': "{{ elastic_password }}"
+
+- name: Ensure Elasticsearch directories ownership
+  file:
+    path: "{{ item }}"
+    owner: "{{ es_owner }}"
+    group: "{{ es_owner }}"
+    state: directory
+    recurse: yes
+  loop:
+    - "{{ es_home }}"
+    - "{{ es_data_dir }}"
+
+- name: Run Elasticsearch on bootstrap node
+  command: "{{ es_home }}/bin/elasticsearch -d"
+  become: true
+  become_user: "{{ es_owner }}"
+  when: inventory_hostname == es_bootstrap_host
+
+- name: Wait for Elasticsearch startup
+  pause:
+    seconds: 120
+  when: inventory_hostname == es_bootstrap_host
+
+- name: Check Elasticsearch process
+  shell: pgrep -f elasticsearch
+  become: true
+#  become_user: "{{ es_owner }}"
+  register: es_status
+  ignore_errors: true
+  when: inventory_hostname == es_bootstrap_host
+
+- name: Elasticsearch is running
+  debug:
+    msg: "Elasticsearch đang chạy với PID: {{ es_status.stdout }}"
+  when:
+    - inventory_hostname == es_bootstrap_host
+    - es_status.rc == 0
+
+- name: Elasticsearch is NOT running
+  debug:
+    msg: "Elasticsearch chưa chạy!"
+  when:
+    - inventory_hostname == es_bootstrap_host
+    - es_status.rc != 0
+
+- name: Fetch certificates to controller
+  run_once: true
+  delegate_to: "{{ es_bootstrap_host }}"
+  fetch:
+    src: "{{ item }}"
+    dest: tmp/es_certs/
+    flat: yes
+  loop:
+    - "{{ elasticsearch_cert_file }}"
+    - "{{ elasticsearch_stack_ca_file }}"
+    - "{{ elasticsearch_keystore_file }}"
+  ignore_errors: true
+
+- name: Copy certificates to other nodes
+  copy:
+    src: "tmp/es_certs/{{ item | basename }}"
+    dest: "{{ item }}"
+    mode: '0644'
+  loop:
+    - "{{ elasticsearch_cert_file }}"
+    - "{{ elasticsearch_stack_ca_file }}"
+    - "{{ elasticsearch_keystore_file }}"
+  when: inventory_hostname != es_bootstrap_host
