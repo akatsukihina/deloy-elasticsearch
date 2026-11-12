@@ -1,4 +1,7 @@
 - name: Set up file
+  import_tasks: download-binary-file.yml
+
+- name: Set up file
   import_tasks: set-up-file.yml
 
 - name: Set up cluster
