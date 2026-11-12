@@ -1,0 +1,14 @@
+cluster_name: Akatsukihina
+elastic_password: Akatsukihina@2025
+es_owner: elasticsearch
+server_owner: akatsukihina
+es_xms: -Xms30g
+es_xmx: -Xmx30g
+es_path: /u01/elasticsearch/
+es_home: /u01/elasticsearch
+es_conf_dir: /u01/elasticsearch/config
+es_data_dir: /u01/elasticsearch-data
+elasticsearch_stack_ca_file: /u01/elasticsearch/config/elastic-node-cert.p12
+elasticsearch_cert_file: /u01/elasticsearch/config/elastic-certificates.p12
+elasticsearch_keystore_file: /u01/elasticsearch/config/elasticsearch.keystore
+elasticsearch_start_cmd: "/u01/elasticsearch/bin/elasticsearch -d"
