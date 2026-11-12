@@ -1,0 +1,22 @@
+- name: Create new group
+  ansible.builtin.group:
+    name: "{{ group_name }}"
+    state: present
+
+- name: Add new user to group
+  ansible.builtin.user:
+    name: "{{ user_name }}"
+    group: "{{ group_name }}"
+    shell: "{{ user_shell }}"
+    home: "{{ home_directory }}"
+    create_home: yes
+    password: "!"
+    state: present
+    password_expire_max: -1
+    expires: -1
+
+- name: Check new user
+  ansible.builtin.command: "id {{ user_name }}"
+  register: user_info
+  failed_when: user_info.rc != 0
+  ignore_errors: false
