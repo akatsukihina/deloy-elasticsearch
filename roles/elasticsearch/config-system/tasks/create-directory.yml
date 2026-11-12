@@ -1,0 +1,8 @@
+- name: Create es directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ es_install_dir }}"
+    - "{{ es_data_dir }}"
