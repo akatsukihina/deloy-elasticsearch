@@ -1,0 +1,8 @@
+- name: Set up file
+  import_tasks: set-up-file.yml
+
+- name: Set up cluster
+  import_tasks: set-up-cluster.yml
+
+- name: Run cluster
+  import_tasks: run-cluster.yml
