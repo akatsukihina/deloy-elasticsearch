@@ -1,0 +1,5 @@
+- name: Download file
+  ansible.builtin.get_url:
+    url: https://www.elastic.co/downloads/past-releases/elasticsearch-7-17-10
+    dest: roles/elasticsearch/run-es/files/elasticsearch-7.17.10-linux-x86_64.tar.gz
+    mode: '0644'
