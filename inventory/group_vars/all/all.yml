@@ -1,0 +1,4 @@
+es_install_dir: /u01/elasticsearch
+es_data_dir: /u01/elasticsearch-data
+server_owner: akatsukihina
+es_owner: elasticsearch
