@@ -1,0 +1,31 @@
+- name: Add the command to disable IPv6 in sysctl.conf
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: "{{ item }}"
+    insertafter: EOF
+  with_items:
+    - "net.ipv6.conf.all.disable_ipv6=1"
+    - "net.ipv6.conf.default.disable_ipv6=1"
+
+- name: Add the command to disable IPv6 in sysctl.conf
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: "{{ item }}"
+    insertafter: EOF
+  with_items:
+    - "net.ipv4.tcp_retries2=5"
+    - "vm.max_map_count=262144"
+
+- name: Run command
+  shell: sysctl --system
+
+- name: Add the command to /etc/security/limits.conf
+  lineinfile:
+    path: /etc/security/limits.conf
+    line: "{{ item }}"
+    insertafter: EOF
+  with_items:
+    - "{{ es_owner }} hard memlock unlimited"
+    - "{{ es_owner }} soft memlock unlimited"
+    - "{{ es_owner }} hard nofile 100000"
+    - "{{ es_owner }} soft nofile 100000"
