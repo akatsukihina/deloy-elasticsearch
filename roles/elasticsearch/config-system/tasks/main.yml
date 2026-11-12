@@ -1,0 +1,8 @@
+- name: Config system
+  import_tasks: config-system.yml
+
+- name: Create user
+  import_tasks: create-user.yml
+
+- name: Create directory
+  import_tasks: create-directory.yml
