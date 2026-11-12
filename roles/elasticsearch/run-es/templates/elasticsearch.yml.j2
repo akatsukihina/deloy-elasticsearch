@@ -1,0 +1,40 @@
+cluster.name: "{{ cluster_name }}"
+node.name: {{ inventory_hostname }}
+path.data: "/u01/elasticsearch-data"
+path.logs: "/u01/elasticsearch/logs"
+bootstrap.memory_lock: true
+network.host: "{{ ansible_host }}"
+http.port: “9200”
+
+discovery.seed_hosts:
+{% for host in groups['all'] %}
+  - "{{ hostvars[host]['ansible_host'] }}"
+{% endfor %}
+
+cluster.initial_master_nodes:
+{% for master in groups['elasticsearch_master'] %}
+  - "{{ hostvars[master]['ansible_host'] }}"
+{% endfor %}
+
+# Thay đổi node.roles theo vai trò của node
+node.roles:
+{% if 'elasticsearch_master' in group_names %}
+  - master
+{% endif %}
+{% if 'elasticsearch_data' in group_names %}
+  - data
+{% endif %}
+{% if 'elasticsearch_ingest' in group_names %}
+  - ingest
+{% endif %}
+
+indices.recovery.max_bytes_per_sec: 100mb 
+action.destructive_requires_name: true
+# XPack security
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: certificate
+xpack.security.transport.ssl.keystore.path: {{ elasticsearch_cert_file }}
+xpack.security.transport.ssl.keystore.password: "{{ elastic_password }}"
+xpack.security.transport.ssl.truststore.path: {{ elasticsearch_cert_file }}
+xpack.security.transport.ssl.truststore.password: "{{ elastic_password }}"
