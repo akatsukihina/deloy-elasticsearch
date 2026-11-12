@@ -1,0 +1,21 @@
+- name: Install Elasticsearch
+  hosts: all
+  gather_facts: true
+  become: yes
+  pre_tasks:
+    - name: Install Java 8 on RedHat/CentOS
+      ansible.builtin.yum:
+        name: java-1.8.0-openjdk
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Install Java 8 on Debian/Ubuntu
+      ansible.builtin.apt:
+        name: openjdk-8-jdk
+        state: present
+        update_cache: true
+      when: ansible_os_family == "Debian"
+
+  roles:
+    - elasticsearch/config-system
+    - elasticsearch/run-es
