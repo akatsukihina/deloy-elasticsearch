@@ -1,8 +1,8 @@
 pipeline {
     agent {
     node {
-        label 'agent-build'
-        customWorkspace "/home/vipa/workspace/${JOB_NAME}"
+        label 'akatsukihina'
+        customWorkspace "/home/akatsukihina/workspace/${JOB_NAME}"
     }
     }
 
@@ -11,11 +11,11 @@ pipeline {
     }
 
     environment {
-        REGISTRY        = 'docker.io'
-        IMAGE_NAME      = 'akatsukihina/ansible/elasticsearch-setup'
+        REGISTRY        = 'registry-lab.akatsukihina.com.vn'
+        IMAGE_NAME      = 'ansible/elasticsearch-setup'
         IMAGE_TAG       = "v1.0.${BUILD_NUMBER}"
         GIT_REPO        = 'https://github.com/akatsukihina/deloy-elasticsearch.git'
-        GIT_CREDENTIAL  = 'git-es-pass'
+        GIT_CREDENTIAL  = 'gitlab-auto'
         REG_CREDENTIAL  = 'registry'
     }
 
